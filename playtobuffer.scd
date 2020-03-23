@@ -4,9 +4,11 @@
 );
 
 // Read & echo the path to the soundfile (for CLI)
-p = thisProcess.argv[0];
+p = '/YOUR_PATH';
 p.postln;
 
+// Clear the buffer
+Buffer.free();
 // Read the soundfile
 d = Buffer.read(s, p);
 
