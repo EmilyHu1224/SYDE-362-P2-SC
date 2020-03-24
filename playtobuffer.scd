@@ -24,11 +24,11 @@
         inf.do {
             c.getn(13, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
 			c.getn(13).postln;
-		    0.5.wait;
+		    0.05.wait;
         }
-    }
+    }.fork;
 );
-r.stop
+r.stop;
 
 // Read each isolated sound
 // p = File.getcwd+/+"isolated_failure_sounds/A.wav";
@@ -116,8 +116,7 @@ p = File.getcwd+/+"control_test_failures/Control Test-10.wav";
     });
 )
 
-
-// Most promising method for queueing coefficients - just needs to be fixed
+// Set coefficient values on bus at scheduled times
 (
 // FFT & MFCC
 	x = {
@@ -128,28 +127,28 @@ p = File.getcwd+/+"control_test_failures/Control Test-10.wav";
 	    Out.kr(0, array); // control bus out
     };
 
-r = Routine({
-	i = 0;
-	z = e.size;
-	p = e[i] * (1 / 44100);
-	p.postln;
-	p.yield;
-    z.size.do {
-		//Load Buffer
-		i.postln;
-		d.free;
-		b = FloatArray.newFrom(y[i].array);
-		d = Buffer.loadCollection(s, b);
-		x.play;
-		if( i + 1 < e.size, {q = (e[i+1] - e[i]-100)*(1/44100)}, {q = y[i].size*(1/44100)});
-        q.yield;
+	r = Routine({
 		s.freeAll;
-		c.value = 0;
-		i = i + 1;
-    }
-});
+		i = 0;
+		z = e.size;
+		p = e[i] * (1 / 44100);
+		p.yield;
+    	z.do {
+			//Load Buffer
+			i.postln;
+			d.free;
+			b = FloatArray.newFrom(y[i].array);
+			d = Buffer.loadCollection(s, b);
+			x.play;
+			if( i + 1 < e.size, {q = (e[i+1] - e[i]-100)*(1/44100)}, {q = y[i].size*(1/44100)});
+        	q.yield;
+			s.freeAll;
+			c.value = 0;
+			i = i + 1;
+    	}
+	});
 
-SystemClock.sched(0, r);
+	SystemClock.sched(0, r);
 )
 
 // Shutdown bus output and server
